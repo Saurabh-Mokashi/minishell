@@ -4,6 +4,7 @@ typedef struct env
 {
 	char *cmd;
 	char *val;
+	struct env *ptr;
 } t_env;
 
 unsigned int	ft_strlen(const char *str)
@@ -45,12 +46,11 @@ int main(int ac, char **agv, char **env)
 	int equalpos = ft_checkeq(env[i],sz);
 	printf("sz is %d, and equalpos is %d",sz,equalpos);
 
-	// while (env[i])
-	// {
-	// 	int sz = ft_strlen(env[i]);
-	// 	int equalpos = ft_checkeq(env[i],sz);
+	while (env[i])
+	{
+		int sz = ft_strlen(env[i]);
+		int equalpos = ft_checkeq(env[i],sz);
 	
-	// // 	printf("%s\n",env[i++]);
-	// }
-
+	// 	printf("%s\n",env[i++]);
+	}
 }
