@@ -27,10 +27,11 @@ unsigned int	ft_strlen(const char *str)
 	return (i);
 }
 
-int ft_checkeq(char *s, int sz)
+int ft_checkeq(char *s)
 {
 	int i = 0;
-	while(i < sz)
+	// while(i < sz)
+	while(s[i])
 	{
 		if(s[i] == '=')
 			return i;
@@ -63,12 +64,12 @@ void populate(char *s1, char *s2, char *s)
 	s2[j]='\0';
 }
 
-t_env* firstentryll(char *s,int sz)
+t_env* firstentryll(char *s)
 {
 	// int sz = ft_strlen(s);
-	int equalpos = ft_checkeq(s,sz);
+	int equalpos = ft_checkeq(s);
 	char *s1 = malloc(sizeof(char)*(equalpos+1));
-	char *s2 = malloc(sizeof(char)*(sz-equalpos));
+	char *s2 = malloc(sizeof(char)*(ft_strlen(s)-equalpos));
 	populate(s1,s2,s);
 	t_env *first;
 	first->ptr=NULL;
@@ -82,26 +83,45 @@ t_env* firstentryll(char *s,int sz)
 
 t_env* laterentryll(char *s, t_env *envvrf)
 {
-	
+	int equalpos = ft_checkeq(s);
+	char *s1 = malloc(sizeof(char)*(equalpos+1));
+	char *s2 = malloc(sizeof(char)*(ft_strlen(s)-equalpos));
+	populate(s1,s2,s);
+	t_env *later;
+	later = malloc(sizeof(t_env));
+	later->cmd=s1;
+	later->val=s2;
+	envvrf->ptr = later;
+	later->ptr=NULL;
+	return later;
 }
 
 int main(int ac, char **agv, char **env)
 {
 	int i = 0;
-	t_env *envvrf, *t_envvrs;
+	t_env *envvrf, *t_envvrs, *first;
 	printf("%s\n",env[i]);
 	int sz = ft_strlen(env[i]);
-	int equalpos = ft_checkeq(env[i],sz);
+	int equalpos = ft_checkeq(env[i]);
 	int j = 0;
 	// printf("sz is %d, and equalpos is %d\n",sz,equalpos);
 	// printf("and the last val is %c",env[i][sz+3]);
 
 	while (env[i])
 	{
-		if(i == 0)
-			envvrf = firstentryll(env[i],sz);
+		if (i == 0)
+		{
+			printf("hi\n");
+			envvrf = firstentryll(env[i]);
+			first=envvrf;
+			printf("cmd is %s\n",first->cmd);
+		}
 		else
+		{
 			t_envvrs = laterentryll(env[i],envvrf);
+			envvrf = t_envvrs;
+			printf("cmd is %s\n",envvrf->cmd);
+		}
 		i++;
 	// 	printf("%s\n",env[i++]);
 	}
