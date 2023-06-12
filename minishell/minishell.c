@@ -72,8 +72,8 @@ t_env* firstentryll(char *s)
 	char *s2 = malloc(sizeof(char)*(ft_strlen(s)-equalpos));
 	populate(s1,s2,s);
 	t_env *first;
-	first->ptr=NULL;
 	first = malloc(sizeof(t_env));
+	first->ptr=NULL;
 	first->cmd=s1;
 	first->val=s2;
 	// printf("\nfirst command is %s\n",first->cmd);
@@ -100,7 +100,7 @@ int main(int ac, char **agv, char **env)
 {
 	int i = 0;
 	t_env *envvrf, *t_envvrs, *first;
-	printf("%s\n",env[i]);
+	// printf("%s\n",env[i]);
 	int sz = ft_strlen(env[i]);
 	int equalpos = ft_checkeq(env[i]);
 	int j = 0;
@@ -111,18 +111,21 @@ int main(int ac, char **agv, char **env)
 	{
 		if (i == 0)
 		{
-			printf("hi\n");
+			// printf("hi\n");
 			envvrf = firstentryll(env[i]);
 			first=envvrf;
-			printf("cmd is %s\n",first->cmd);
+			// printf("cmd is %s\n",first->cmd);
 		}
 		else
 		{
 			t_envvrs = laterentryll(env[i],envvrf);
 			envvrf = t_envvrs;
-			printf("cmd is %s\n",envvrf->cmd);
+			// printf("cmd is %s\n",envvrf->cmd);
 		}
 		i++;
 	// 	printf("%s\n",env[i++]);
 	}
+	// printf("cmd is %s, and its value is %s",first->ptr->ptr->cmd,first->ptr->ptr->val);
+	
+
 }
