@@ -125,7 +125,8 @@ int main(int ac, char **agv, char **env)
 		i++;
 	// 	printf("%s\n",env[i++]);
 	}
-	// printf("cmd is %s, and its value is %s",first->ptr->ptr->cmd,first->ptr->ptr->val);
+	printf("cmd is %s, and its value is %s\n",first->cmd,first->val);
+	printf("and the ori val is %s\n",env[0]);
 	
 
 }
