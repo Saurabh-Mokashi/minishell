@@ -112,6 +112,9 @@ int carryitforward(char **terms,char **envp)
 		wait(NULL);
 		close(fd[1]);
 		//read from fd, and display
+		read(fd[0]);
+		execve();
+		write();
 		close(fd[0]);
 		char *cmd=terms[1];
 	}
