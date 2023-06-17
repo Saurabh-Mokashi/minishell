@@ -102,9 +102,9 @@ int carryitforward(char **terms,char **envp)
 	if(id == 0)
 	{
 		close(fd[0]);
-		char *cmd = terms[0];
+		// char *cmd = terms[0];
 		dup2(fd[1],1);
-		execve("/bin/ls", ft_split(cmd,' '), envp);
+		execve("/bin/ls", ft_split(terms[0],' '), envp);
 		close(fd[1]);
 	}
 	else
@@ -112,11 +112,14 @@ int carryitforward(char **terms,char **envp)
 		wait(NULL);
 		close(fd[1]);
 		//read from fd, and display
-		read(fd[0]);
-		execve();
-		write();
+		// char *cmd = terms[1];
+		dup2(fd[0],0);
+		execve("/usr/bin/wc", ft_split(terms[1],' '), envp);
+		// read(fd[0]);
+		// execve();
+		// write();
 		close(fd[0]);
-		char *cmd=terms[1];
+		// char *cmd=terms[1];
 	}
 	return 0;
 }
@@ -125,7 +128,7 @@ int main(int ac, char **agv, char **envp)
 {
 	int i = 0;
 	char **terms;
-	char s[50] = "ls -la | wc -l";
+	char s[50] = "ls -l | wc -l";
 	char sep[2] = "|";
 	int fd[2];
 	char *token;
@@ -139,9 +142,10 @@ int main(int ac, char **agv, char **envp)
 	// 	i++;
 	// }
 	terms = ft_split(s,'|');
-	printf("%s",terms[1]);//successfuly got the commands seperated
+	printf("%s",terms[0]);//successfuly got the commands seperated
 	if(carryitforward(terms,envp)==0)
 		printf("success!!\n");
+	// execve("/usr/bin/wc", ft_split(terms[1],' '),envp);
 
 	return (0);
 }
