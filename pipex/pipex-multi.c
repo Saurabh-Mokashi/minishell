@@ -481,102 +481,98 @@ int main(int ac, char **agv, char **envp)
     }
     printf("pipes ready\n");
     i=0;
-            // int id1 = fork();
-            // if(id1 == 0)
-            // {
-            //     close(fd[1][1]);
-            //     close(fd[1][0]);
-            //     close(fd[0][0]);
-            //     dup2(fd[0][1],1);
-            //     execution(envp,ft_split(terms[i],' '));
-            //     close(fd[0][1]);
-            // }
-            // int id2 = fork();
-            // if(id2==0)
-            // {
-            //     close(fd[0][1]);
-            //     close(fd[1][0]);
-            //     printf("closed fd[0][1] and fd[1][0]\n");
-            //     dup2(fd[0][0],0);
-            //     dup2(fd[1][1],1);
-            //     execution(envp,ft_split(terms[1],' '));
-            //     printf("after exec\n");
-            //     close(fd[0][0]);//close(fd[i-1][0]);
-            //     close(fd[1][1]);//close(fd[i][1]);
-            // }
-            // //parent process
-            // close(fd[0][1]);
-            // close(fd[0][0]);
-            // close(fd[1][1]);
-            // printf("closed fd[0][1], fd[0][0], fd[1][1]\n");
-            // dup2(fd[1][0],0);
-            // execution(envp,ft_split(terms[2],' '));
-            // printf("after exec\n");
-            // close(fd[1][0]);
+    int id1 = fork();
+    if(id1 == 0)
+    {
+        close(fd[1][1]);
+        close(fd[1][0]);
+        close(fd[0][0]);
+        dup2(fd[0][1],1);
+        close(fd[0][1]);
+        execution(envp,ft_split(terms[i],' '));
+    }
+    int id2 = fork();
+    if(id2==0)
+    {
+        close(fd[0][1]);
+        close(fd[1][0]);
+        printf("closed fd[0][1] and fd[1][0]\n");
+        dup2(fd[0][0],0);
+        dup2(fd[1][1],1);
+        close(fd[0][0]);//close(fd[i-1][0]);
+        close(fd[1][1]);//close(fd[i][1]);
+        execution(envp,ft_split(terms[1],' '));
+        printf("after exec\n");
+    }
+    //parent process
+    close(fd[0][1]);
+    close(fd[0][0]);
+    close(fd[1][1]);
+    printf("closed fd[0][1], fd[0][0], fd[1][1]\n");
+    dup2(fd[1][0],0);
+    close(fd[1][0]);
+    execution(envp,ft_split(terms[2],' '));
+    printf("after exec\n");
     // waitpid(id1,NULL,0);
     // waitpid(id2,NULL,0);
-    while (i<sz)
-    {
-        printf("hi\n");
-        fnpercmd(terms[i],envp,i,(int **)fd,sz);
-        //below is copied from fnpercmd function
-    int id = fork();
-    if(id==0)
-    {
-        if (i == 0)
-        {
-            printf("b4\n");
-            // if(close(fd[1][1]) == -1)
-            //     printf("couldnt close fd[1][1]");
-            int x = close(fd[1][1]);
-            printf("x val is %d\n",x);
-            printf("after\n");
-            if(close(fd[1][0])== -1)
-                printf("couldnt close fd[1][0]");
-            if(close(fd[0][0])==-1)
-                printf("couldnt close fd[0][0]");
-            printf("closed fd[1][1], fd[1][0], fd[0][0]\n");
-            dup2(fd[0][1],1);
-            printf("before exec\n");
-            execution(envp,ft_split(terms[i],' '));
-            printf("after exec\n");
-            close(fd[0][1]);//close(fd[i][1]);
-            return 0;
-        }
-        else if (i == 1)
-        {
-            close(fd[0][1]);
-            close(fd[1][0]);
-            printf("closed fd[0][1] and fd[1][0]\n");
-            dup2(fd[0][0],0);
-            dup2(fd[1][1],1);
-            execution(envp,ft_split(terms[i],' '));
-            printf("after exec\n");
-            close(fd[0][0]);//close(fd[i-1][0]);
-            close(fd[1][1]);//close(fd[i][1]);
-            return 1;
-        }
-        else
-        {
-            close(fd[0][1]);
-            close(fd[0][0]);
-            close(fd[1][1]);
-            printf("closed fd[0][1], fd[0][0], fd[1][1]\n");
-            dup2(fd[1][0],0);
-            execution(envp,ft_split(terms[i],' '));
-            printf("after exec\n");
-            close(fd[1][0]);
-            return 2;
-        }
-    }
-    else
-    {
-        waitpid(id, NULL, 0);
-        return 10;
-    }
-        //above is copied from fnpercmd function
-        i++;
-    }
+    // while (i<sz)
+    // {
+    //     printf("hi\n");
+    //     // fnpercmd(terms[i],envp,i,(int **)fd,sz);
+    //     //below is copied from fnpercmd function
+    // int id = fork();
+    // if(id==0)
+    // {
+    //     if (i == 0)
+    //     {
+    //         printf("b4\n");
+    //         // if(close(fd[1][1]) == -1)
+    //         //     printf("couldnt close fd[1][1]");
+    //         int x = close(fd[1][1]);
+    //         printf("x val is %d\n",x);
+    //         printf("after\n");
+    //         if(close(fd[1][0])== -1)
+    //             printf("couldnt close fd[1][0]");
+    //         if(close(fd[0][0])==-1)
+    //             printf("couldnt close fd[0][0]");
+    //         printf("closed fd[1][1], fd[1][0], fd[0][0]\n");
+    //         dup2(fd[0][1],1);
+    //         printf("before exec\n");
+    //         execution(envp,ft_split(terms[i],' '));
+    //         printf("after exec\n");
+    //         close(fd[0][1]);//close(fd[i][1]);
+    //     }
+    //     else if (i == 1)
+    //     {
+    //         close(fd[0][1]);
+    //         close(fd[1][0]);
+    //         printf("closed fd[0][1] and fd[1][0]\n");
+    //         dup2(fd[0][0],0);
+    //         dup2(fd[1][1],1);
+    //         execution(envp,ft_split(terms[i],' '));
+    //         printf("after exec\n");
+    //         close(fd[0][0]);//close(fd[i-1][0]);
+    //         close(fd[1][1]);//close(fd[i][1]);
+    //     }
+    //     else
+    //     {
+    //         close(fd[0][1]);
+    //         close(fd[0][0]);
+    //         close(fd[1][1]);
+    //         printf("closed fd[0][1], fd[0][0], fd[1][1]\n");
+    //         dup2(fd[1][0],0);
+    //         execution(envp,ft_split(terms[i],' '));
+    //         printf("after exec\n");
+    //         close(fd[1][0]);
+    //     }
+    // }
+    // else
+    // {
+    //     waitpid(id, NULL, 0);
+    // }
+    //     //above is copied from fnpercmd function
+    //     i++;
+    // }
 	// printf("%s",terms[0]);//successfuly got the commands seperated
 	// if(carryitforward(terms,envp)==0)
 	// 	printf("success!!\n");

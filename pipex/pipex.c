@@ -6,7 +6,7 @@
 /*   By: smokashi <smokashi@student.42abudhabi.a    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/21 21:45:16 by smokashi          #+#    #+#             */
-/*   Updated: 2023/06/26 11:35:33 by smokashi         ###   ########.fr       */
+/*   Updated: 2023/06/28 18:33:18 by smokashi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -357,6 +357,7 @@ void print_doubchar(char **s)
 	}
 	printf("thts it\n");
 }
+
 int carryitforward(char **terms,char **envp)
 {
 	int fd[2];//for pipes;
