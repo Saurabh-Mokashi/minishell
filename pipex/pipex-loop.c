@@ -1,19 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex-multi.c                                      :+:      :+:    :+:   */
+/*   pipex-loop.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: drm <drm@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/21 21:37:28 by smokashi          #+#    #+#             */
-/*   Updated: 2023/07/01 18:03:31 by drm              ###   ########.fr       */
+/*   Created: 2023/07/01 19:33:05 by drm               #+#    #+#             */
+/*   Updated: 2023/07/10 20:58:24 by drm              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <string.h>
 #include <stdio.h>
-#include <unistd.h>
+#include <readline/history.h>
+#include <readline/readline.h>
+// #include <readline.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
+#include <signal.h>
+#include <errno.h>
 #include <sys/wait.h>
 
 size_t	ft_strlen(const char *str)
@@ -84,6 +90,13 @@ char	*ft_strdup(const char *s)
 	ft_memcpy(s1, s, i);
 	s1[i] = '\0';
 	return (s1);
+}
+
+void	ft_putstr_fd(char *s, int fd)
+{
+	if (s)
+		while (*s)
+			write(fd, s++, 1);
 }
 
 int	getwords(char *s, char c)
@@ -176,6 +189,13 @@ char	**ft_split(char const *p, char c)
 
 int ft_size(char **s)
 {
+	printf("the string got to check size is %s\n",s[0]);
+	// int j = 0;
+	// while(s[j])
+	// {
+	// 	printf("%s",s[j]);
+	// 	j++;
+	// }
 	int i = -1;
 	while(s[++i]) ;
 	return i;
@@ -381,64 +401,6 @@ int execution(char **envp, char **cmd)
     return 0;
 }
 
-void fnpercmd(char *cmd, char **envp, int i, int **fd,int sz)
-{
-    int id = fork();
-    if(id==0)
-    {
-        if (i==0)
-        {
-            printf("b4\n");
-            // if(close(fd[1][1]) == -1)
-            //     printf("couldnt close fd[1][1]");
-            int x = close(fd[1][1]);
-            printf("x val is %d\n",x);
-            printf("after\n");
-            if(close(fd[1][0])== -1)
-                printf("couldnt close fd[1][0]");
-            if(close(fd[0][0])==-1)
-                printf("couldnt close fd[0][0]");
-            printf("closed fd[1][1], fd[1][0], fd[0][0]\n");
-            if(dup2(fd[i][1],1)==-1)
-                printf("error\n");
-            printf("before exec\n");
-            execution(envp,ft_split(cmd,' '));
-            printf("after exec\n");
-            close(fd[0][1]);//close(fd[i][1]);
-        }
-        else if(i == sz-1)
-        {
-            close(fd[0][1]);
-            close(fd[0][0]);
-            close(fd[1][1]);
-            printf("closed fd[0][1], fd[0][0], fd[1][1]\n");
-            if(dup2(fd[i-1][0],0)==-1)
-                printf("error\n");
-            execution(envp,ft_split(cmd,' '));
-            printf("after exec\n");
-            close(fd[1][0]);
-        }
-        else
-        {
-            close(fd[0][1]);
-            close(fd[1][0]);
-            printf("closed fd[0][1] and fd[1][0]\n");
-            if(dup2(fd[i-1][0],0)==-1)
-                printf("error\n");
-            if(dup2(fd[i][1],1)==-1)
-                printf("error\n");
-            execution(envp,ft_split(cmd,' '));
-            printf("after exec\n");
-            close(fd[0][0]);//close(fd[i-1][0]);
-            close(fd[1][1]);//close(fd[i][1]);
-        }
-    }
-    else
-    {
-        wait(NULL);
-    }
-}
-
 int ft_pipecnt(char *s)
 {
     int i=0;
@@ -452,12 +414,11 @@ int ft_pipecnt(char *s)
     return cnt;
 }
 
-int main(int ac, char **agv, char **envp)
+int pipex(char *s, char **envp)
 {
-    int i = 0;
+	int i = 0,j=0;
 	char **terms;
 	int sz,pipecnt;
-	char s[50] = "ps -ef|grep root|wc -l";
 	// strcpy(terms[i],strtok(s,sep));
 	// token = strtok(s,sep);
 	// // i++;
@@ -468,7 +429,14 @@ int main(int ac, char **agv, char **envp)
 	// 	i++;
 	// }
 	terms = ft_split(s,'|');
+	while(terms[j])
+	{
+		printf("%s\n",terms[j]);j++;
+	}
+	j = 0;
+	printf("success\n");
 	sz = ft_size(terms);
+	printf("size:%d\n",sz);
     pipecnt = ft_pipecnt(s);
 	// printf("%d is the number of terms\n",sz);
 	// printf("%d is the number of pipes\n",pipecnt);
@@ -477,106 +445,141 @@ int main(int ac, char **agv, char **envp)
     {
         if(pipe(fd[i])==-1)
             printf("cant open pipe with desired fd\n");
+        int id = fork();
+        if(id == 0)
+        {
+            close(fd[i][0]);
+            dup2(fd[i][1],STDOUT_FILENO);
+			close(fd[i][1]);
+			if (execution(envp,ft_split(terms[i],' '))==0)
+				printf("could not execute\n");
+        }
+        else
+        {
+            waitpid(id,NULL,0);
+			printf("segf?\n");
+            close(fd[i][1]);
+            dup2(fd[i][0],STDIN_FILENO);
+			close(fd[i][0]);
+        }
+		printf("one iter\n");
         i++; 
     }
-    // printf("pipes ready\n");
-    i=0;
-    // int id1 = fork();
-    // if(id1 == 0)
+	// printf("seg2\n");
+	int id1=fork();
+	if(id1==0)
+	{
+		printf("exec one arg\n");
+		execution(envp,ft_split(terms[i],' '));
+	}
+	else
+		// waitpid(id1,NULL,0);
+		wait(NULL);
+	// printf("seg1\n");
+	printf("input string is %s\n",s);
+	return 0;
+}
+
+char* readlinecheck()
+{
+	char *buf;
+	buf = readline("myshell> ");
+	return buf;
+// 	if(ft_strlen(buf) > 0)
+// 	{
+// 		add_history(buf);
+// 		strcpy(s,buf);
+// 		return 0;
+// 	}
+// 	else
+// 		return 1;
+}
+
+int main(int ac, char **agv, char **envp)
+{
+    // int i = 0;
+	// char **terms;
+	// int sz,pipecnt;
+	// char s[50] = "ls -la | wc";
+	// // strcpy(terms[i],strtok(s,sep));
+	// // token = strtok(s,sep);
+	// // // i++;
+	// // while (token!=NULL)
+	// // {
+	// // 	strcpy(terms[i],token);
+	// // 	token = strtok(NULL,sep);
+	// // 	i++;
+	// // }
+	// terms = ft_split(s,'|');
+	// sz = ft_size(terms);
+    // pipecnt = ft_pipecnt(s);
+	// // printf("%d is the number of terms\n",sz);
+	// // printf("%d is the number of pipes\n",pipecnt);
+    // int fd[pipecnt][2];
+    // while(i<pipecnt)
     // {
-    //     close(fd[1][1]);
-    //     close(fd[1][0]);
-    //     close(fd[0][0]);
-    //     dup2(fd[0][1],1);
-    //     close(fd[0][1]);
-    //     execution(envp,ft_split(terms[i],' '));
-    // }
-    // int id2 = fork();
-    // if(id2==0)
-    // {
-    //     close(fd[0][1]);
-    //     close(fd[1][0]);
-    //     // printf("closed fd[0][1] and fd[1][0]\n");
-    //     dup2(fd[0][0],0);
-    //     dup2(fd[1][1],1);
-    //     close(fd[0][0]);//close(fd[i-1][0]);
-    //     close(fd[1][1]);//close(fd[i][1]);
-    //     execution(envp,ft_split(terms[1],' '));
-    //     printf("after exec\n");
-    // }
-    // //parent process
-    // close(fd[0][1]);
-    // close(fd[0][0]);
-    // close(fd[1][1]);
-    // // printf("closed fd[0][1], fd[0][0], fd[1][1]\n");
-    // dup2(fd[1][0],0);
-    // close(fd[1][0]);
-    // execution(envp,ft_split(terms[2],' '));
-    // printf("after exec\n");
-    // waitpid(id1,NULL,0);
-    // waitpid(id2,NULL,0);
-    while (i<sz)
-    {
-        printf("hi\n");
-        fnpercmd(terms[i],envp,i,(int **)fd,sz);
-    //     //below is copied from fnpercmd function
-    // int id = fork();
-    // if(id==0)
-    // {
-    //     if (i == 0)
+    //     if(pipe(fd[i])==-1)
+    //         printf("cant open pipe with desired fd\n");
+    //     int id = fork();
+    //     if(id == 0)
     //     {
-    //         printf("b4\n");
-    //         // if(close(fd[1][1]) == -1)
-    //         //     printf("couldnt close fd[1][1]");
-    //         int x = close(fd[1][1]);
-    //         printf("x val is %d\n",x);
-    //         printf("after\n");
-    //         if(close(fd[1][0])== -1)
-    //             printf("couldnt close fd[1][0]");
-    //         if(close(fd[0][0])==-1)
-    //             printf("couldnt close fd[0][0]");
-    //         printf("closed fd[1][1], fd[1][0], fd[0][0]\n");
-    //         dup2(fd[0][1],1);
-    //         printf("before exec\n");
-    //         execution(envp,ft_split(terms[i],' '));
-    //         printf("after exec\n");
-    //         close(fd[0][1]);//close(fd[i][1]);
-    //     }
-    //     else if (i == 1)
-    //     {
-    //         close(fd[0][1]);
-    //         close(fd[1][0]);
-    //         printf("closed fd[0][1] and fd[1][0]\n");
-    //         dup2(fd[0][0],0);
-    //         dup2(fd[1][1],1);
-    //         execution(envp,ft_split(terms[i],' '));
-    //         printf("after exec\n");
-    //         close(fd[0][0]);//close(fd[i-1][0]);
-    //         close(fd[1][1]);//close(fd[i][1]);
+    //         close(fd[i][0]);
+    //         dup2(fd[i][1],1);
+    //         if (execution(envp,ft_split(terms[i],' '))==0)
+    //             printf("could not execute\n");
     //     }
     //     else
     //     {
-    //         close(fd[0][1]);
-    //         close(fd[0][0]);
-    //         close(fd[1][1]);
-    //         printf("closed fd[0][1], fd[0][0], fd[1][1]\n");
-    //         dup2(fd[1][0],0);
-    //         execution(envp,ft_split(terms[i],' '));
-    //         printf("after exec\n");
-    //         close(fd[1][0]);
+    //         wait(NULL);
+    //         close(fd[i][1]);
+    //         dup2(fd[i][0],0);
     //     }
+    //     i++; 
     // }
-    // else
-    // {
-    //     waitpid(id, NULL, 0);
-    // }
-    //     //above is copied from fnpercmd function
-        i++;
-    }
-	// printf("%s",terms[0]);//successfuly got the commands seperated
-	// if(carryitforward(terms,envp)==0)
-	// 	printf("success!!\n");
-	// int x = execve("/bin/ls", ft_split(terms[0],' '),envp);
-	// printf("\n%d\n",x);
-	return (0);
+    // execution(envp,ft_split(terms[i],' '));
+    // // printf("pipes ready\n");
+    // // i=0;
+    // // while (i<sz)
+    // // {
+    // //     printf("hi\n");
+    // //     fnpercmd(terms[i],envp,i,(int **)fd,sz);
+    // //     i++;
+    // // }
+    // return (0);
+		char *s;
+	while(1)
+	{
+		// echooption = false;
+		// t_env *llforenv = converttoll(agv,env);
+		// printf("No new line? lets check:\n");
+		// printf("ll conversion success\n");
+		// if(readlinecheck(s))
+		// 	continue;
+		// s = readline("myshell> ");
+		s = readlinecheck();
+		// printf("string received is %s\n",s);
+		// rl_on_new_line();
+		// rl_replace_line("", 0);
+		// ft_putstr_fd("\n", 2);
+		// rl_on_new_line();
+		// rl_redisplay();
+		// rl_redisplay();
+		// printf("readline success\n");
+		// if(ft_strlen(s)>0)
+		printf("hi\n");
+		if(s)
+			add_history(s);
+		// else
+		// 	continue;
+		// printf("seg1\n");
+		printf("history added\n");
+		if(s)
+			pipex(s,envp);//seg fault here
+		printf("pipex success\n");
+		// printf("pipex over");
+		// if(s)
+			free(s);
+		printf("seg3\n");
+		// printf("free s\n");
+	}
 }
