@@ -601,44 +601,109 @@ int ft_exit()//DOES NOT WORK
 // 		return 1;
 // 	return 0;
 // }
+
+char *parseforpurecmd(char *s)
+{
+	printf("welcomen and string received to be made to substr is %s\n",s);
+	int equalpos = ft_checkeq(s);
+	if(equalpos==-1)
+		return s;
+	printf("got string is %s\n",ft_substr(s,0,equalpos));
+	return ft_substr(s,0,equalpos);
+}
+
+void update_export(t_env *first, char *s)
+{
+	free(first->val);
+	int equalpos=ft_checkeq(s);
+	first->val = ft_substr(s,equalpos+1,ft_strlen(s));
+}
+
 int checkforrepeat(char *s,t_env *first)
 {
 	printf("check for repeat\n");
 	t_env *sec;
 
 	sec = first->next;
-	if(ft_strncmp(s,first->cmd,(ft_strlen(s)>ft_strlen(first->cmd))?ft_strlen(s):ft_strlen(first->cmd)) == 0)
+	// printf("comparing %s and %s as same\n",parseforpurecmd(s),first->cmd);
+	if(ft_strncmp(parseforpurecmd(s),first->cmd,(ft_strlen(s)>ft_strlen(first->cmd))?ft_strlen(s):ft_strlen(first->cmd)) == 0)
 		// printf("found repeat\n");
+	{
+		// update
+		printf("return 1\n");
+		update_export(first,s);
 		return 1;
+	}
 	while(sec!=first)
 	{
-		if(ft_strncmp(s,sec->cmd,(ft_strlen(s)>ft_strlen(sec->cmd))?ft_strlen(s):ft_strlen(sec->cmd)) == 0)
+		// printf("comparing %s and %s as same\n",s,parseforpurecmd(sec->cmd));
+		if(ft_strncmp(parseforpurecmd(s),sec->cmd,(ft_strlen(s)>ft_strlen(sec->cmd))?ft_strlen(s):ft_strlen(sec->cmd)) == 0)
+		{
+			printf("return 1\n");
+			update_export(sec,s);
 			return 1;
+		}
 		sec=sec->next;
 	}
 	return 0;
 }
 
 
-void update_export(t_env *llforexport, char *s)
-{
-	int i = 1;
-	if(s[0]=='-')
-		return ;
-	t_env *first=llforexport->next;
-	if(ft_strncmp(llforexport->cmd,ft_strjoin("declare -x ",s),ft_strlen(llforexport->cmd)) == 0)
-	{
-		free(llforexport->val);
-		int equalpos=ft_checkeq(s);
-		if(equalpos == -1)
-			return ;
-		char *temp = ft_substr(s,equalpos,ft_strlen(s));
-		printf("using new substr, we get %s\n\n",temp);
+// void update_export(t_env *llforexport, char *s)
+// {
+// 	int i = 1;
+// 	if(s[0]=='-')
+// 		return ;
+// 	t_env *first=llforexport->next;
+// 	//add a check for the first ele i.e.llforexport as well*****
+// 	// if(ft_strncmp(llforexport->cmd,ft_strjoin("declare -x ",s),ft_strlen(llforexport->cmd)) == 0)
+// 	// ft_strncmp(parseforpurecmd(s),sec->cmd
+// 	if(ft_strncmp(parseforpurecmd(s),first->cmd,ft_strlen(llforexport->cmd)) == 0)
+// 	{
+// 		free(llforexport->val);
+// 		int equalpos=ft_checkeq(s);
+// 		if(equalpos == -1)
+// 			return ;
+// 		char *temp = ft_substr(s,equalpos,ft_strlen(s));
+// 		llforexport->val = temp;
+// 		printf("using new substr, we get %s\n\n",temp);
 		
-		
-	}
-	// printf("\n\n%s\n\n",first->cmd);
-}
+// 	}
+// 	// printf("\n\n%s\n\n",first->cmd);
+
+// 	t_env *sec;
+
+// 	sec = llforexport->next;
+// 	printf("comparing %s and %s as same\n",parseforpurecmd(s),llforexport->cmd);
+// 	if(ft_strncmp(parseforpurecmd(s),llforexport->cmd,(ft_strlen(s)>ft_strlen(llforexport->cmd))?ft_strlen(s):ft_strlen(llforexport->cmd)) == 0)
+// 		// printf("found repeat\n");
+// 	{
+// 		// update
+// 		free(llforexport->val);
+// 		int equalpos=ft_checkeq(s);
+// 		if(equalpos == -1)
+// 			return ;
+// 		char *temp = ft_substr(s,equalpos,ft_strlen(s));
+// 		llforexport->val = temp;
+// 		printf("using new substr, we get %s\n\n",temp);
+
+// 	}
+// 	while(sec!=first)
+// 	{
+// 		printf("comparing %s and %s as same\n",s,parseforpurecmd(sec->cmd));
+// 		if(ft_strncmp(parseforpurecmd(s),sec->cmd,(ft_strlen(s)>ft_strlen(sec->cmd))?ft_strlen(s):ft_strlen(sec->cmd)) == 0)
+// 		{
+// 		free(sec->val);
+// 		int equalpos=ft_checkeq(s);
+// 		if(equalpos == -1)
+// 			return ;
+// 		char *temp = ft_substr(s,equalpos,ft_strlen(s));
+// 		sec->val = temp;
+// 		printf("using new substr, we get %s\n\n",temp);
+// 		}
+// 		sec=sec->next;
+// 	}
+// }
 
 void addtoexport(t_env *llforexport, char **cmd)
 {
@@ -654,7 +719,7 @@ void addtoexport(t_env *llforexport, char **cmd)
 		if(checkforrepeat(ft_strjoin("declare -x ",cmd[i]),first) || cmd[i][0] == '-')
 		{
 			printf("repeat or flag\n");
-			// update_export(llforexport,cmd[i]);
+			update_export(llforexport,cmd[i]);
 			i++;
 			continue;
 		}
