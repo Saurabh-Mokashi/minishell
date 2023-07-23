@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   minishell.c                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: drm <drm@student.42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/02 02:01:43 by drm               #+#    #+#             */
-/*   Updated: 2023/07/17 01:48:36 by drm              ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -675,6 +663,63 @@ int checkforrepeat(char *s,t_env *first)
 	return 0;
 }
 
+
+// void update_export(t_env *llforexport, char *s)
+// {
+// 	int i = 1;
+// 	if(s[0]=='-')
+// 		return ;
+// 	t_env *first=llforexport->next;
+// 	//add a check for the first ele i.e.llforexport as well*****
+// 	// if(ft_strncmp(llforexport->cmd,ft_strjoin("declare -x ",s),ft_strlen(llforexport->cmd)) == 0)
+// 	// ft_strncmp(parseforpurecmd(s),sec->cmd
+// 	if(ft_strncmp(parseforpurecmd(s),first->cmd,ft_strlen(llforexport->cmd)) == 0)
+// 	{
+// 		free(llforexport->val);
+// 		int equalpos=ft_checkeq(s);
+// 		if(equalpos == -1)
+// 			return ;
+// 		char *temp = ft_substr(s,equalpos,ft_strlen(s));
+// 		llforexport->val = temp;
+// 		printf("using new substr, we get %s\n\n",temp);
+		
+// 	}
+// 	// printf("\n\n%s\n\n",first->cmd);
+
+// 	t_env *sec;
+
+// 	sec = llforexport->next;
+// 	printf("comparing %s and %s as same\n",parseforpurecmd(s),llforexport->cmd);
+// 	if(ft_strncmp(parseforpurecmd(s),llforexport->cmd,(ft_strlen(s)>ft_strlen(llforexport->cmd))?ft_strlen(s):ft_strlen(llforexport->cmd)) == 0)
+// 		// printf("found repeat\n");
+// 	{
+// 		// update
+// 		free(llforexport->val);
+// 		int equalpos=ft_checkeq(s);
+// 		if(equalpos == -1)
+// 			return ;
+// 		char *temp = ft_substr(s,equalpos,ft_strlen(s));
+// 		llforexport->val = temp;
+// 		printf("using new substr, we get %s\n\n",temp);
+
+// 	}
+// 	while(sec!=first)
+// 	{
+// 		printf("comparing %s and %s as same\n",s,parseforpurecmd(sec->cmd));
+// 		if(ft_strncmp(parseforpurecmd(s),sec->cmd,(ft_strlen(s)>ft_strlen(sec->cmd))?ft_strlen(s):ft_strlen(sec->cmd)) == 0)
+// 		{
+// 		free(sec->val);
+// 		int equalpos=ft_checkeq(s);
+// 		if(equalpos == -1)
+// 			return ;
+// 		char *temp = ft_substr(s,equalpos,ft_strlen(s));
+// 		sec->val = temp;
+// 		printf("using new substr, we get %s\n\n",temp);
+// 		}
+// 		sec=sec->next;
+// 	}
+// }
+
 void addtoexport(t_env *llforexport, char **cmd)
 {
 	//also have to add to env, if = present
@@ -722,9 +767,8 @@ void addtoexport(t_env *llforexport, char **cmd)
 	// t_env->cmd = malloc(sizeof())
 }
 
-int ft_export(t_ptr *ptr,char **cmd)
+int ft_export(t_env *llforexport,char **cmd)
 {
-	t_env *llforexport=ptr->export;
 	t_env *temp;
 	printf("%d is the size\n",ft_size(cmd));
 	if(ft_size(cmd) == 1)
@@ -747,7 +791,6 @@ int ft_export(t_ptr *ptr,char **cmd)
 	else
 	{
 		addtoexport(llforexport,cmd);
-		// addtoenv();IF = IS THERE, WE NEED TO ADD TO ENV AS WELL.
 	}
 	return 1;
 }
@@ -864,7 +907,7 @@ int ft_unset(t_ptr *ptr,char **cmd)
 int checkforbuiltin(char **cmd,t_ptr *ptr, int *fd)
 {
 	int i = 0;
-	// printf("in builtin checker\n");
+	printf("in builtin checker\n");
 	if(ft_strncmp(cmd[0],"pwd",ft_strlen(cmd[0]))==0)
 		i = ft_getpwd(fd);
 	else if(ft_strncmp(cmd[0],"echo",ft_strlen(cmd[0])) == 0)
@@ -874,7 +917,7 @@ int checkforbuiltin(char **cmd,t_ptr *ptr, int *fd)
 	else if(ft_strncmp(cmd[0],"env",ft_strlen(cmd[0])) == 0)
 		i = ft_env(ptr->env);
 	else if(ft_strncmp(cmd[0],"export",ft_strlen(cmd[0])) == 0)
-		i = ft_export(ptr,cmd);
+		i = ft_export(ptr->export,cmd);
 	else if(ft_strncmp(cmd[0],"unset",ft_strlen(cmd[0])) == 0)
 		i = ft_unset(ptr,cmd);
 	return i;
@@ -882,7 +925,7 @@ int checkforbuiltin(char **cmd,t_ptr *ptr, int *fd)
 
 int execution(char **envp, char **cmd,t_ptr *ptr, int *fd)
 {
-    // printf("hello from execution\n");
+    printf("hello from execution\n");
     int i = -1;
     char *pathvar = getpath(envp, "PATH");
     char **paths = ft_splitpath(pathvar,':');
@@ -922,9 +965,20 @@ int pipex(char *s, char **envp, t_ptr *ptr)
 	int i = 0;
 	char **terms;
 	int sz,pipecnt;
+	// strcpy(terms[i],strtok(s,sep));
+	// token = strtok(s,sep);
+	// // i++;
+	// while (token!=NULL)
+	// {
+	// 	strcpy(terms[i],token);
+	// 	token = strtok(NULL,sep);
+	// 	i++;
+	// }
 	terms = ft_split(s,'|');
 	sz = ft_size(terms);
     pipecnt = ft_pipecnt(s);
+	// printf("%d is the number of terms\n",sz);
+	// printf("%d is the number of pipes\n",pipecnt);
     int fd[pipecnt][2];
 	int stdin_copy = dup(STDIN_FILENO);
 	int stdout_copy = dup(STDOUT_FILENO);
@@ -936,23 +990,22 @@ int pipex(char *s, char **envp, t_ptr *ptr)
         if(id == 0)
         {
             close(fd[i][0]);
-            dup2(fd[i][1],STDOUT_FILENO);
-			// ft_putstr_fd("in id=0 phase\n",1);
-			close(fd[i][1]);
+            dup2(fd[i][1],1);
 			// printf("in id == 0\n");
-			// ft_putstr_fd("in id=0 phase\n",1);
-			if (execution(envp,ft_split(terms[i],' '),ptr, (int *)fd[i])==0)
-				printf("could not execute\n");
-			exit (0);
+			close(fd[i][1]);
+			// if (execution(envp,ft_split(terms[i],' '),ptr, (int *)fd[i])==0)
+			// 	printf("could not execute\n");
+			if(checkforbuiltin(ft_split(terms[i],' '),ptr,fd))
+				return 0;
+
         }
         else
         {
 			// printf("in parent\n");
-            close(fd[i][1]);
-            dup2(fd[i][0],STDIN_FILENO);
-			close(fd[i][0]);
             waitpid(id,NULL,0);
-			// ft_putstr_fd("in id=0 else phase\n",1);
+            close(fd[i][1]);
+            dup2(fd[i][0],0);
+			// close(fd[i][0]);
         }
         i++; 
     }
@@ -960,8 +1013,7 @@ int pipex(char *s, char **envp, t_ptr *ptr)
 	int id1=fork();
 	if(id1==0)
 	{
-		// printf("in id1\n");
-		// ft_putstr_fd("in id1",1);
+		printf("in id1\n");
 		execution(envp,ft_split(terms[i],' '),ptr, (int *)fd[i-1]);
 	}
 	else
@@ -978,7 +1030,7 @@ void sig_handler(int code, siginfo_t *info, void *ucontext)
 	if(code == 2)
 	{
 		//SIGINT-new prompt on newline
-		rl_replace_line("", 0);
+		// rl_replace_line("", 0);
 		// ft_putstr_fd("\n", 2);
 		rl_on_new_line();
 		rl_redisplay();
@@ -1063,7 +1115,7 @@ int main(int ac, char **agv, char **env)
 		// printf("ll conversion success\n");
 		// rl_on_new_line();
 		s = readline("myshell> ");
-		// rl_redisplay();
+		rl_redisplay();
 		// printf("readline success\n");
 		if(s)
 			add_history(s);

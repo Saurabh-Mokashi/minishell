@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   pipex-loop.c                                       :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: drm <drm@student.42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/01 19:33:05 by drm               #+#    #+#             */
-/*   Updated: 2023/07/10 20:58:24 by drm              ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include <stdio.h>
 #include <readline/history.h>
 #include <readline/readline.h>
@@ -546,9 +534,10 @@ int main(int ac, char **agv, char **envp)
     // //     i++;
     // // }
     // return (0);
-		char *s;
+	char *s;
 	while(1)
 	{
+		int loop = 0;
 		// echooption = false;
 		// t_env *llforenv = converttoll(agv,env);
 		// printf("No new line? lets check:\n");
@@ -557,6 +546,16 @@ int main(int ac, char **agv, char **envp)
 		// 	continue;
 		// s = readline("myshell> ");
 		s = readlinecheck();
+		// while(s == NULL)
+		// {
+		// 	s = readlinecheck();
+		// }
+		// while ((s = readlinecheck())!=NULL)
+		// {
+		// 	;
+		// }
+		
+		int loop = 0;
 		// printf("string received is %s\n",s);
 		// rl_on_new_line();
 		// rl_replace_line("", 0);
