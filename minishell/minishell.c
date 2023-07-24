@@ -616,11 +616,15 @@ t_env *findinll(t_env *ptr, char *s)
 	t_env *last = ptr;//or ptr->next, both work ig
 	while(last->next!=ptr)
 		last=last->next;
+	if(ft_strncmp(s,last->cmd, ft_strlen(s))==0)
+		return last;
 	while (ptr!=last)
 	{
-		
+		if(ft_strncmp(s,ptr->cmd, ft_strlen(s)) == 0)
+			break;
+		ptr=ptr->next;
 	}
-	
+	return ptr;
 }
 
 char *parseforpurecmd(char *s)
@@ -647,7 +651,7 @@ void update_export(t_env *first, char *s)
 	first->val = ft_substr(s,equalpos+1,ft_strlen(s));
 }
 
-int checkforrepeat(char *s,t_env *first)
+int checkforrepeat(char *s,t_env *first)//updates export values
 {
 	printf("check for repeat\n");
 	t_env *sec;
@@ -899,6 +903,8 @@ int ft_unset(t_ptr *ptr,char **cmd)
 }
 int ft_cd(t_ptr *ptr, char **cmd)
 {
+	t_env *ptr_to_ol;
+	t_env *ptr_to_curr;
 	ft_putstr_fd("welcm to cd builtin secn\n",1);
 	if(ft_size(cmd)>2)
 	{
@@ -906,9 +912,18 @@ int ft_cd(t_ptr *ptr, char **cmd)
 		return 1;
 	}
 	if(chdir(cmd[1]) == -1)
+	{
 		ft_putstr_fd("some problem with cd\n",1);
+		return 1;
+	}
+	ptr_to_ol=findinll(ptr->env, "OLDPWD");
+	ptr_to_curr = findinll(ptr->env, "PWD");
+	// printf("%s is the string we get \n", findinll(ptr->env, "OLDPWD")->cmd);
+	// free(ptr_to_ol->val);
+	// ft_strjoin(ptr_to_ol->val, ptr_to_curr->val);
+	// free(ptr_to_curr->val);
+	// ft_strjoin(ptr_to_curr->val, getcwd(NULL, 0));something wrong here
 	// ptr->env Update export and env pwds and oldpwds both, so total 4
-	
 	return 1;
 }
 int checkforbuiltin(char **cmd,t_ptr *ptr, int *fd)
