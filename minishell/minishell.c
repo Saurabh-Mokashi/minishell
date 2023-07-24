@@ -675,6 +675,39 @@ int checkforrepeat(char *s,t_env *first)
 	return 0;
 }
 
+void addtoenv(t_env *llforenv, char **cmd)
+{
+	int i = 1;
+	t_env *first = llforenv;
+	while (llforenv->next!=first)
+		llforenv=llforenv->next;
+	while(i<ft_size(cmd))
+	{
+		if(checkforrepeat(cmd[i],first))
+		{
+			i++;
+			continue;
+		}
+		t_env *new = malloc(sizeof(t_env));
+		int equalpos=ft_checkeq(cmd[i]);
+		if(equalpos==-1)
+		{
+			i++;
+			continue;
+		}
+		else
+		{
+			new->cmd = malloc(sizeof(char)*(equalpos+1));
+			new->val = malloc(sizeof(char)*(ft_strlen(cmd[i])-equalpos));
+			populate(new->cmd, new->val, cmd[i]);
+		}
+		new->next=first;
+		llforenv->next=new;
+		llforenv=llforenv->next;
+		i++;
+	}
+}
+
 void addtoexport(t_env *llforexport, char **cmd)
 {
 	//also have to add to env, if = present
@@ -747,7 +780,7 @@ int ft_export(t_ptr *ptr,char **cmd)
 	else
 	{
 		addtoexport(llforexport,cmd);
-		// addtoenv();IF = IS THERE, WE NEED TO ADD TO ENV AS WELL.
+		addtoenv(ptr->env,cmd);//IF = IS THERE, WE NEED TO ADD TO ENV AS WELL.
 	}
 	return 1;
 }
