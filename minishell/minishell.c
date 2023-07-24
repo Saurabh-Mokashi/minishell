@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: drm <drm@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: smokashi <smokashi@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/02 02:01:43 by drm               #+#    #+#             */
-/*   Updated: 2023/07/17 01:48:36 by drm              ###   ########.fr       */
+/*   Updated: 2023/07/24 19:21:58 by smokashi         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -314,7 +314,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	return (str);
 }
 
-int	getwords(char *s, char c)
+int		getwords(char *s, char c)
 {
 	int	i;
 	int	word;
@@ -611,13 +611,17 @@ int ft_exit()//DOES NOT WORK
 	// return 1;
 }
 
-// int flagcheckforexport(char *s)
-// {
-// 	int i = 0;
-// 	if(s[i]=='-')
-// 		return 1;
-// 	return 0;
-// }
+t_env *findinll(t_env *ptr, char *s)
+{
+	t_env *last = ptr;//or ptr->next, both work ig
+	while(last->next!=ptr)
+		last=last->next;
+	while (ptr!=last)
+	{
+		
+	}
+	
+}
 
 char *parseforpurecmd(char *s)
 {
@@ -893,7 +897,20 @@ int ft_unset(t_ptr *ptr,char **cmd)
 	ft_unset_export(cmd, ptr->env,1);//for env
 	return 1;
 }
-
+int ft_cd(t_ptr *ptr, char **cmd)
+{
+	ft_putstr_fd("welcm to cd builtin secn\n",1);
+	if(ft_size(cmd)>2)
+	{
+		ft_putstr_fd("cant cd to multiple directories\n",1);
+		return 1;
+	}
+	if(chdir(cmd[1]) == -1)
+		ft_putstr_fd("some problem with cd\n",1);
+	// ptr->env Update export and env pwds and oldpwds both, so total 4
+	
+	return 1;
+}
 int checkforbuiltin(char **cmd,t_ptr *ptr, int *fd)
 {
 	int i = 0;
@@ -910,6 +927,8 @@ int checkforbuiltin(char **cmd,t_ptr *ptr, int *fd)
 		i = ft_export(ptr,cmd);
 	else if(ft_strncmp(cmd[0],"unset",ft_strlen(cmd[0])) == 0)
 		i = ft_unset(ptr,cmd);
+	else if(ft_strncmp(cmd[0],"cd",ft_strlen(cmd[0])) == 0)
+		i = ft_cd(ptr,cmd);
 	return i;
 }
 
@@ -1012,7 +1031,7 @@ void sig_handler(int code, siginfo_t *info, void *ucontext)
 	{
 		//SIGINT-new prompt on newline
 		rl_replace_line("", 0);
-		// ft_putstr_fd("\n", 2);
+		ft_putstr_fd("\n", 2);
 		rl_on_new_line();
 		rl_redisplay();
 	}
@@ -1024,7 +1043,8 @@ void signals()
 {
 	struct sigaction sa;
 	sa.sa_sigaction = sig_handler;
-	// sa.sa_flags = SA_RESTART | SA_SIGINFO;
+	// sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART | SA_SIGINFO;
 	sigaction(SIGINT,&sa,NULL);
 	sigaction(SIGQUIT,&sa,NULL);
 	
@@ -1070,11 +1090,10 @@ int main(int ac, char **agv, char **env)
 	// }
 	// printf("cmd is %s, and its value is %s\n",first->ptr->cmd,first->ptr->val);
 	// printf("and the ori val is %s\n",env[1]);
-	// signals();//DOES NOT WORK
+	signals();//DOES NOT WORK
 	// signal(SIGINT, handle_sigint);
 	// signal(SIGQUIT, handle_sigint);
 	// signal(SIGSTOP, handle_sigint);
-	
 	
 	t_env *llforenv = converttoll(agv,env,1);
 	t_env *llforexport = converttoll(agv,env,0);
