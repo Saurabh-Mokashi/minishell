@@ -100,6 +100,31 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 	return ((void *)dest);
 }
 
+// size_t	ft_strlcat(char *dest, const char *src, size_t size)
+// {
+// 	size_t	dest_len;
+// 	size_t	src_len;
+// 	size_t	index;
+// 	size_t	len;
+
+// 	dest_len = 0;
+// 	src_len = 0;
+// 	index = 0;
+// 	while (dest[dest_len] != '\0' && dest_len < size)
+// 		dest_len++;
+// 	src_len = ft_strlen(src);
+// 	len = src_len + dest_len;
+// 	if (size == dest_len)
+// 		return (len);
+// 	while (src[index] != '\0' && (dest_len + index) < (size - 1))
+// 	{
+// 		dest[dest_len + index] = src[index];
+// 		index++;
+// 	}
+// 	dest[dest_len + index] = '\0';
+// 	return (len);
+// }
+
 void populateforexport(char *s1,char *s2,char *s)
 {
 	// char *cpy;
@@ -621,10 +646,10 @@ t_env *findinll(t_env *ptr, char *s)
 	while (ptr!=last)
 	{
 		if(ft_strncmp(s,ptr->cmd, ft_strlen(s)) == 0)
-			break;
+			return ptr;
 		ptr=ptr->next;
 	}
-	return ptr;
+	return NULL;
 }
 
 char *parseforpurecmd(char *s)
@@ -901,10 +926,70 @@ int ft_unset(t_ptr *ptr,char **cmd)
 	ft_unset_export(cmd, ptr->env,1);//for env
 	return 1;
 }
+
+void cdenv(t_env *ptrenv)
+{
+	t_env *ptr_to_olenv;
+	t_env *ptr_to_currenv;
+	ptr_to_olenv=findinll(ptrenv, "OLDPWD");
+	ptr_to_currenv = findinll(ptrenv, "PWD");
+	if(ptr_to_olenv == NULL)
+	{
+		t_env *oldpwdenv = malloc(sizeof(t_env));
+
+		oldpwdenv->cmd = malloc(6 * sizeof(char));
+		oldpwdenv->cmd = ft_memcpy(oldpwdenv->cmd, "OLDPWD", 6);
+		oldpwdenv->val = ft_strdup(ptr_to_currenv->val);
+		oldpwdenv->next = ptrenv->next;
+		ptrenv->next = oldpwdenv;
+		free(ptr_to_currenv->val);
+		ptr_to_currenv->val = ft_strdup(getcwd(NULL,0));
+		printf("%s is the cmd and val is %s\n",oldpwdenv->cmd,oldpwdenv->val);
+		printf("%s is the cmd and val is %s\n",ptr_to_currenv->cmd,ptr_to_currenv->val);
+	}
+	else{
+		free(ptr_to_olenv->val);
+		ptr_to_olenv->val = ft_strdup(ptr_to_currenv->val);
+		free(ptr_to_currenv->val);
+		ptr_to_currenv->val = ft_strdup(getcwd(NULL,0));
+	}
+}
+void cdexport(t_env *ptrexp)
+{
+	t_env *ptr_to_olexport;
+	t_env *ptr_to_currexport;
+
+	ptr_to_olexport=findinll(ptrexp, "OLDPWD");
+	ptr_to_currexport = findinll(ptrexp, "PWD");
+	if(ptr_to_olexport->val == NULL)
+	{
+		t_env *oldpwdexport = malloc(sizeof(t_env));
+	
+		oldpwdexport->cmd = malloc(17 * sizeof(char));
+		oldpwdexport->cmd = ft_memcpy(oldpwdexport->cmd, "declare -x OLDPWD",17);
+		oldpwdexport->val = ft_strdup(ptr_to_currexport->val);
+		oldpwdexport->next = ptrexp->next;
+		ptrexp->next = oldpwdexport;
+		free(ptr_to_currexport->val);
+		ptr_to_currexport->val = ft_strdup(getcwd(NULL,0));
+		printf("%s is the cmd and val is %s\n",oldpwdexport->cmd,oldpwdexport->val);
+		printf("%s is the cmd and val is %s\n",ptr_to_currexport->cmd,ptr_to_currexport->val);
+	}
+	else
+	{
+		free(ptr_to_olexport->val);
+		ptr_to_olexport->val = ft_strdup(ptr_to_currexport->val);
+		free(ptr_to_currexport->val);
+		ptr_to_currexport->val = ft_strdup(getcwd(NULL,0));
+	}
+}
+
 int ft_cd(t_ptr *ptr, char **cmd)
 {
-	t_env *ptr_to_ol;
-	t_env *ptr_to_curr;
+	// t_env *ptr_to_olenv;
+	// t_env *ptr_to_currenv;
+	// t_env *ptr_to_olexport;
+	// t_env *ptr_to_currexport;
 	ft_putstr_fd("welcm to cd builtin secn\n",1);
 	if(ft_size(cmd)>2)
 	{
@@ -916,14 +1001,60 @@ int ft_cd(t_ptr *ptr, char **cmd)
 		ft_putstr_fd("some problem with cd\n",1);
 		return 1;
 	}
-	ptr_to_ol=findinll(ptr->env, "OLDPWD");
-	ptr_to_curr = findinll(ptr->env, "PWD");
-	// printf("%s is the string we get \n", findinll(ptr->env, "OLDPWD")->cmd);
-	// free(ptr_to_ol->val);
-	// ft_strjoin(ptr_to_ol->val, ptr_to_curr->val);
-	// free(ptr_to_curr->val);
-	// ft_strjoin(ptr_to_curr->val, getcwd(NULL, 0));something wrong here
-	// ptr->env Update export and env pwds and oldpwds both, so total 4
+	// cdenv(ptr->env);
+	t_env *ptr_to_olenv;
+	t_env *ptr_to_currenv;
+	t_env *ptrenv = ptr->env;
+	ptr_to_olenv = findinll(ptrenv, "OLDPWD");
+	ptr_to_currenv = findinll(ptrenv, "PWD");
+	if(ptr_to_olenv == NULL)
+	{
+		t_env *oldpwdenv = malloc(sizeof(t_env));
+
+		oldpwdenv->cmd = malloc(6 * sizeof(char));
+		oldpwdenv->cmd = ft_memcpy(oldpwdenv->cmd, "OLDPWD", 6);
+		oldpwdenv->val = ft_strdup(ptr_to_currenv->val);
+		oldpwdenv->next = ptrenv->next;
+		ptrenv->next = oldpwdenv;
+		free(ptr_to_currenv->val);
+		ptr_to_currenv->val = ft_strdup(getcwd(NULL,0));
+		// printf("%s is the cmd and val is %s\n",oldpwdenv->cmd,oldpwdenv->val);
+		// printf("%s is the cmd and val is %s\n",ptr_to_currenv->cmd,ptr_to_currenv->val);
+	}
+	else{
+		free(ptr_to_olenv->val);
+		ptr_to_olenv->val = ft_strdup(ptr_to_currenv->val);
+		free(ptr_to_currenv->val);
+		ptr_to_currenv->val = ft_strdup(getcwd(NULL,0));
+	}
+	// cdexport(ptr->export);
+	// t_env *ptrexp = ptr->export;
+	// t_env *ptr_to_olexport;
+	// t_env *ptr_to_currexport;
+
+	// ptr_to_olexport=findinll(ptrexp, "declare -x OLDPWD");
+	// ptr_to_currexport = findinll(ptrexp, "declare -x PWD");
+	// if(ptr_to_olexport->val == NULL)
+	// {
+	// 	t_env *oldpwdexport = malloc(sizeof(t_env));
+	
+	// 	oldpwdexport->cmd = malloc(17 * sizeof(char));
+	// 	oldpwdexport->cmd = ft_memcpy(oldpwdexport->cmd, "declare -x OLDPWD",17);
+	// 	oldpwdexport->val = ft_strdup(ptr_to_currexport->val);
+	// 	oldpwdexport->next = ptrexp->next;
+	// 	ptrexp->next = oldpwdexport;
+	// 	free(ptr_to_currexport->val);
+	// 	ptr_to_currexport->val = ft_strdup(getcwd(NULL,0));
+	// 	// printf("%s is the cmd and val is %s\n",oldpwdexport->cmd,oldpwdexport->val);
+	// 	// printf("%s is the cmd and val is %s\n",ptr_to_currexport->cmd,ptr_to_currexport->val);
+	// }
+	// else
+	// {
+	// 	free(ptr_to_olexport->val);
+	// 	ptr_to_olexport->val = ft_strdup(ptr_to_currexport->val);
+	// 	free(ptr_to_currexport->val);
+	// 	ptr_to_currexport->val = ft_strdup(getcwd(NULL,0));
+	// }
 	return 1;
 }
 int checkforbuiltin(char **cmd,t_ptr *ptr, int *fd)
