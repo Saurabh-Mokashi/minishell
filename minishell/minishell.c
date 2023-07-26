@@ -837,7 +837,7 @@ void ft_unset_export(char **cmd, t_env* ptr, int j)
 	int i = 1;
 	while(i<ft_size(cmd))
 	{
-		printf("gonna try\n");
+		// printf("gonna try\n");
 		first = ptr;
 		end = first;
 		while(end->next!=ptr)
@@ -847,11 +847,11 @@ void ft_unset_export(char **cmd, t_env* ptr, int j)
 		// printf("sec cmd is %s and val is %s",sec->cmd,sec->val);
 		// printf("end cmd is %s and val is %s",end->cmd,end->val);
 		// printf("after end cmd is %s and val is %s",end->next->cmd,end->next->val);
-		printf("comparing %s and %s\n",first->cmd,ft_strjoin("declare -x ",cmd[i]));
+		// printf("comparing %s and %s\n",first->cmd,ft_strjoin("declare -x ",cmd[i]));
 		if(j == 0){//for export
 		if(ft_strncmp(first->cmd,ft_strjoin("declare -x ",cmd[i]),(ft_strlen(ft_strjoin("declare -x ",cmd[i]))>ft_strlen(first->cmd))?ft_strlen(ft_strjoin("declare -x ",cmd[i])):ft_strlen(first->cmd)) == 0)
 		{
-			printf("found\n");
+			// printf("found\n");
 			end->next=sec;
 			free(first);
 			i++;
@@ -865,7 +865,7 @@ void ft_unset_export(char **cmd, t_env* ptr, int j)
 		{//for env
 		if(ft_strncmp(first->cmd,cmd[i],(ft_strlen(cmd[i])>ft_strlen(first->cmd))?ft_strlen(cmd[i]):ft_strlen(first->cmd)) == 0)
 		{
-			printf("found\n");
+			// printf("found\n");
 			end->next=sec;
 			free(first);
 			i++;
@@ -875,7 +875,7 @@ void ft_unset_export(char **cmd, t_env* ptr, int j)
 			// return 1;
 		}
 		}
-		printf("done\n");
+		// printf("done\n");
 		// ft_strncmp(s,first->cmd,(ft_strlen(s)>ft_strlen(first->cmd))?ft_strlen(s):ft_strlen(first->cmd)) == 
 		while(sec != ptr)
 		{
@@ -883,12 +883,12 @@ void ft_unset_export(char **cmd, t_env* ptr, int j)
 			if(j == 0){//for export
 			if(ft_strncmp(sec->cmd,ft_strjoin("declare -x ",cmd[i]),(ft_strlen(ft_strjoin("declare -x ",cmd[i]))>ft_strlen(sec->cmd))?ft_strlen(ft_strjoin("declare -x ",cmd[i])):ft_strlen(sec->cmd)) == 0)
 			{
-				printf("found\n");
-				printf("2 strs are %s and %s\n",sec->cmd,cmd[i]);
+				// printf("found\n");
+				// printf("2 strs are %s and %s\n",sec->cmd,cmd[i]);
 				first->next = sec->next;
 				free(sec);
 				sec=first->next;
-				printf("now the strings are %s and %s",first->cmd,sec->cmd);
+				// printf("now the strings are %s and %s",first->cmd,sec->cmd);
 				// i++;
 				break;
 				// continue;
@@ -899,12 +899,12 @@ void ft_unset_export(char **cmd, t_env* ptr, int j)
 			{
 			if(ft_strncmp(sec->cmd,cmd[i],(ft_strlen(cmd[i])>ft_strlen(sec->cmd))?ft_strlen(cmd[i]):ft_strlen(sec->cmd)) == 0)
 			{
-				printf("found\n");
-				printf("2 strs are %s and %s\n",sec->cmd,cmd[i]);
+				// printf("found\n");
+				// printf("2 strs are %s and %s\n",sec->cmd,cmd[i]);
 				first->next = sec->next;
 				free(sec);
 				sec=first->next;
-				printf("now the strings are %s and %s",first->cmd,sec->cmd);
+				// printf("now the strings are %s and %s",first->cmd,sec->cmd);
 				// i++;
 				break;
 				// continue;
@@ -916,7 +916,7 @@ void ft_unset_export(char **cmd, t_env* ptr, int j)
 		}
 		i++;
 	}
-	printf("ending\n");
+	// printf("ending\n");
 }
 int ft_unset(t_ptr *ptr,char **cmd)
 {
@@ -944,8 +944,8 @@ void cdenv(t_env *ptrenv)
 		ptrenv->next = oldpwdenv;
 		free(ptr_to_currenv->val);
 		ptr_to_currenv->val = ft_strdup(getcwd(NULL,0));
-		printf("%s is the cmd and val is %s\n",oldpwdenv->cmd,oldpwdenv->val);
-		printf("%s is the cmd and val is %s\n",ptr_to_currenv->cmd,ptr_to_currenv->val);
+		// printf("%s is the cmd and val is %s\n",oldpwdenv->cmd,oldpwdenv->val);
+		// printf("%s is the cmd and val is %s\n",ptr_to_currenv->cmd,ptr_to_currenv->val);
 	}
 	else{
 		free(ptr_to_olenv->val);
@@ -953,30 +953,36 @@ void cdenv(t_env *ptrenv)
 		free(ptr_to_currenv->val);
 		ptr_to_currenv->val = ft_strdup(getcwd(NULL,0));
 	}
+	printf("returning\n");
 }
 void cdexport(t_env *ptrexp)
 {
 	t_env *ptr_to_olexport;
 	t_env *ptr_to_currexport;
 
-	ptr_to_olexport=findinll(ptrexp, "OLDPWD");
-	ptr_to_currexport = findinll(ptrexp, "PWD");
-	if(ptr_to_olexport->val == NULL)
+	ptr_to_olexport=findinll(ptrexp, "declare -x OLDPWD");
+	ptr_to_currexport = findinll(ptrexp, "declare -x PWD");
+	// printf("hi\n");
+	// printf("%s is the cmd and %s is the val\n",ptr_to_olexport->cmd, ptr_to_olexport->val);
+	if(ptr_to_olexport == NULL)
 	{
+		// printf("ini\n");
 		t_env *oldpwdexport = malloc(sizeof(t_env));
 	
-		oldpwdexport->cmd = malloc(17 * sizeof(char));
-		oldpwdexport->cmd = ft_memcpy(oldpwdexport->cmd, "declare -x OLDPWD",17);
+		// oldpwdexport->cmd = malloc(17 * sizeof(char));
+		// oldpwdexport->cmd = ft_memcpy(oldpwdexport->cmd, "declare -x OLDPWD",17);
+		oldpwdexport->cmd = ft_strdup("declare -x OLDPWD");
 		oldpwdexport->val = ft_strdup(ptr_to_currexport->val);
 		oldpwdexport->next = ptrexp->next;
 		ptrexp->next = oldpwdexport;
 		free(ptr_to_currexport->val);
 		ptr_to_currexport->val = ft_strdup(getcwd(NULL,0));
-		printf("%s is the cmd and val is %s\n",oldpwdexport->cmd,oldpwdexport->val);
-		printf("%s is the cmd and val is %s\n",ptr_to_currexport->cmd,ptr_to_currexport->val);
+		// printf("%s is the cmd and val is %s\n",oldpwdexport->cmd,oldpwdexport->val);
+		// printf("%s is the cmd and val is %s\n",ptr_to_currexport->cmd,ptr_to_currexport->val);
 	}
 	else
 	{
+		// printf("hi\n");
 		free(ptr_to_olexport->val);
 		ptr_to_olexport->val = ft_strdup(ptr_to_currexport->val);
 		free(ptr_to_currexport->val);
@@ -1001,60 +1007,9 @@ int ft_cd(t_ptr *ptr, char **cmd)
 		ft_putstr_fd("some problem with cd\n",1);
 		return 1;
 	}
-	// cdenv(ptr->env);
-	t_env *ptr_to_olenv;
-	t_env *ptr_to_currenv;
-	t_env *ptrenv = ptr->env;
-	ptr_to_olenv = findinll(ptrenv, "OLDPWD");
-	ptr_to_currenv = findinll(ptrenv, "PWD");
-	if(ptr_to_olenv == NULL)
-	{
-		t_env *oldpwdenv = malloc(sizeof(t_env));
-
-		oldpwdenv->cmd = malloc(6 * sizeof(char));
-		oldpwdenv->cmd = ft_memcpy(oldpwdenv->cmd, "OLDPWD", 6);
-		oldpwdenv->val = ft_strdup(ptr_to_currenv->val);
-		oldpwdenv->next = ptrenv->next;
-		ptrenv->next = oldpwdenv;
-		free(ptr_to_currenv->val);
-		ptr_to_currenv->val = ft_strdup(getcwd(NULL,0));
-		// printf("%s is the cmd and val is %s\n",oldpwdenv->cmd,oldpwdenv->val);
-		// printf("%s is the cmd and val is %s\n",ptr_to_currenv->cmd,ptr_to_currenv->val);
-	}
-	else{
-		free(ptr_to_olenv->val);
-		ptr_to_olenv->val = ft_strdup(ptr_to_currenv->val);
-		free(ptr_to_currenv->val);
-		ptr_to_currenv->val = ft_strdup(getcwd(NULL,0));
-	}
-	// cdexport(ptr->export);
-	// t_env *ptrexp = ptr->export;
-	// t_env *ptr_to_olexport;
-	// t_env *ptr_to_currexport;
-
-	// ptr_to_olexport=findinll(ptrexp, "declare -x OLDPWD");
-	// ptr_to_currexport = findinll(ptrexp, "declare -x PWD");
-	// if(ptr_to_olexport->val == NULL)
-	// {
-	// 	t_env *oldpwdexport = malloc(sizeof(t_env));
+	cdenv(ptr->env);
+	cdexport(ptr->export);
 	
-	// 	oldpwdexport->cmd = malloc(17 * sizeof(char));
-	// 	oldpwdexport->cmd = ft_memcpy(oldpwdexport->cmd, "declare -x OLDPWD",17);
-	// 	oldpwdexport->val = ft_strdup(ptr_to_currexport->val);
-	// 	oldpwdexport->next = ptrexp->next;
-	// 	ptrexp->next = oldpwdexport;
-	// 	free(ptr_to_currexport->val);
-	// 	ptr_to_currexport->val = ft_strdup(getcwd(NULL,0));
-	// 	// printf("%s is the cmd and val is %s\n",oldpwdexport->cmd,oldpwdexport->val);
-	// 	// printf("%s is the cmd and val is %s\n",ptr_to_currexport->cmd,ptr_to_currexport->val);
-	// }
-	// else
-	// {
-	// 	free(ptr_to_olexport->val);
-	// 	ptr_to_olexport->val = ft_strdup(ptr_to_currexport->val);
-	// 	free(ptr_to_currexport->val);
-	// 	ptr_to_currexport->val = ft_strdup(getcwd(NULL,0));
-	// }
 	return 1;
 }
 int checkforbuiltin(char **cmd,t_ptr *ptr, int *fd)
@@ -1098,7 +1053,7 @@ int execution(char **envp, char **cmd,t_ptr *ptr, int *fd)
             // printf("No cmd for %s\n",which);
         // printf("no execve comm found\n");
     }
-    printf("command not found\n");
+    printf("found\n");
     return 0;
 }
 
@@ -1256,11 +1211,12 @@ int main(int ac, char **agv, char **env)
 	while(1)
 	{
 		echooption = false;
-		
 		// printf("No new line? lets check:");
 		// printf("ll conversion success\n");
 		// rl_on_new_line();
 		s = readline("myshell> ");
+		if(strncmp(s,"exit",ft_strlen(s)) == 0)
+			exit (0);
 		// rl_redisplay();
 		// printf("readline success\n");
 		if(s)
